@@ -85,7 +85,7 @@
   font-size: 14px;
 }
 
-.timeBtn:not(.unavailable):hover {
+.timeBtn:hover {
   border-color: #3182ce;
   color: #3182ce;
 }
@@ -100,16 +100,26 @@
   background: #eeeeee;
   border-color: #cccccc;
   color: #888888;
-  cursor: not-allowed;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
+.timeBtn.unavailable:hover {
+  border-color: #d69e2e;
+  color: #744210;
+}
+
+.timeBtn.unavailable.selected {
+  background: #d69e2e;
+  border-color: #d69e2e;
+  color: #1a1204;
+}
+
 .tag {
   font-size: 11px;
-  background: #2d2d2d;
-  color: #666;
+  background: #3d3014;
+  color: #f6d365;
   padding: 2px 6px;
   border-radius: 4px;
 }

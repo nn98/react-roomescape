@@ -20,6 +20,10 @@ export default defineConfig({
       '/reservations': {
         target: 'http://localhost:8080',
         changeOrigin: true,
+      },
+      '/waitings': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
       }
     }
   }

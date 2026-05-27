@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { fetchThemes, fetchAvailableTimes, createReservation } from '../api/index.js';
+import { fetchThemes, fetchAvailableTimes, createReservation, createWaiting } from '../api/index.js';
 import styles from './ReservationPage.module.css';
 
 const today = new Date().toISOString().split('T')[0];
 
-export default function ReservationPage({ onConfirm, onBack }) {
+export default function ReservationPage({ onConfirm, onBack, showToast }) {
   const [themes, setThemes] = useState([]);
   const [selectedTheme, setSelectedTheme] = useState('');
   const [date, setDate] = useState(today);
@@ -14,6 +14,8 @@ export default function ReservationPage({ onConfirm, onBack }) {
   const [loadingTimes, setLoadingTimes] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const selectedTimeInfo = times.find((time) => String(time.id) === selectedTime);
+  const isWaitingMode = selectedTimeInfo && !selectedTimeInfo.isAvailable;
 
   useEffect(() => {
     fetchThemes().then(setThemes).catch((e) => setError(e.message));
@@ -39,12 +41,21 @@ export default function ReservationPage({ onConfirm, onBack }) {
     setSubmitting(true);
     setError(null);
     try {
-      const result = await createReservation({
+      const body = {
         themeId: Number(selectedTheme),
         date,
         timeId: Number(selectedTime),
         name: name.trim(),
-      });
+      };
+
+      if (isWaitingMode) {
+        await createWaiting(body);
+        showToast('대기 신청이 완료되었습니다.');
+        onBack();
+        return;
+      }
+
+      const result = await createReservation(body);
       onConfirm(result);
     } catch (e) {
       setError(e.message);
@@ -90,7 +101,7 @@ export default function ReservationPage({ onConfirm, onBack }) {
 
         {selectedTheme && date && (
           <div className={styles.field}>
-            <label>예약 가능 시간</label>
+            <label>예약 및 대기 가능 시간</label>
             {loadingTimes ? (
               <p className={styles.hint}>불러오는 중...</p>
             ) : times.length === 0 ? (
@@ -101,12 +112,11 @@ export default function ReservationPage({ onConfirm, onBack }) {
                   <button
                     key={t.id}
                     type="button"
-                    disabled={!t.isAvailable}
                     className={`${styles.timeBtn} ${!t.isAvailable ? styles.unavailable : ''} ${selectedTime === String(t.id) ? styles.selected : ''}`}
-                    onClick={() => t.isAvailable && setSelectedTime(String(t.id))}
+                    onClick={() => setSelectedTime(String(t.id))}
                   >
                     {t.startAt.slice(0, 5)}
-                    {!t.isAvailable && <span className={styles.tag}>예약됨</span>}
+                    {!t.isAvailable && <span className={styles.tag}>대기 가능</span>}
                   </button>
                 ))}
               </div>
@@ -132,7 +142,7 @@ export default function ReservationPage({ onConfirm, onBack }) {
           className={styles.submitBtn}
           disabled={!selectedTheme || !date || !selectedTime || !name.trim() || submitting}
         >
-          {submitting ? '예약 중...' : '예약 확정'}
+          {submitting ? `${isWaitingMode ? '대기 신청' : '예약'} 중...` : `${isWaitingMode ? '대기 신청' : '예약 확정'}`}
         </button>
       </form>
     </div>

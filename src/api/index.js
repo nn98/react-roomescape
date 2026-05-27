@@ -1,12 +1,14 @@
 // api/index.js
 
 const parseResponse = async (response) => {
+  const responseText = await response.text();
+
   if (!response.ok) {
     let errorMsg = `${response.status} ${response.statusText}`;
     try {
       // ProblemDetail 규격인 'detail' 필드를 최우선으로 파싱하고,
       // 기존 하위 호환성을 위해 'message' 필드도 확인합니다.
-      const errorData = await response.json();
+      const errorData = JSON.parse(responseText);
       if (errorData.detail) {
         errorMsg = errorData.detail;
       } else if (errorData.message) {
@@ -17,16 +19,18 @@ const parseResponse = async (response) => {
     }
     throw new Error(errorMsg);
   }
-  if (response.status === 204) {
+  if (response.status === 204 || !responseText) {
     return null;
   }
-  return response.json();
+  return JSON.parse(responseText);
 };
 
 const fetchJson = async (url, options) => {
   const response = await fetch(url, options);
   return parseResponse(response);
 };
+
+const createQueryString = (params) => new URLSearchParams(params).toString();
 
 // --- Theme API ---
 export const fetchThemes = () => fetchJson('/themes');
@@ -56,7 +60,14 @@ export const updateTime = (id, body) => fetchJson(`/times/${id}`, {
 });
 
 // --- Reservation API (User Domain) ---
-export const getReservationsByName = (userName) => fetchJson(`/reservations?userName=${userName}`);
+export const getReservationsByName = (userName) => fetchJson(`/reservations?${createQueryString({ userName })}`);
 export const createReservation = (body) => fetchJson('/reservations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-export const deleteReservation = (id, userName) => fetchJson(`/reservations/${id}?userName=${userName}`, { method: 'DELETE' });
-export const putReservation = (id, userName, body) => fetchJson(`/reservations/${id}?userName=${userName}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+export const deleteReservation = (id, userName) => fetchJson(`/reservations/${id}?${createQueryString({ userName })}`, { method: 'DELETE' });
+export const putReservation = (id, userName, body) => fetchJson(`/reservations/${id}?${createQueryString({ userName })}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+// --- Waiting API ---
+export const createWaiting = (body) =>
+    fetchJson('/waitings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+export const deleteWaiting = (id, userName) =>
+    fetchJson(`/waitings/${id}?${createQueryString({ userName })}`, { method: 'DELETE' });
