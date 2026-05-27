@@ -5,6 +5,9 @@ import styles from './MyReservationPage.module.css';
 const getTheme = (item) => item.themeResponse ?? item.theme;
 const getTime = (item) => item.timeResponse ?? item.time;
 const isReservedItem = (item) => item.isReserved ?? true;
+const getReservationType = (isReserved) => isReserved ? '예약' : '대기';
+const getReservationTypeWithObjectParticle = (isReserved) => isReserved ? '예약을' : '대기를';
+const getCancelCompleteMessage = (isReserved) => isReserved ? '예약이 취소되었습니다.' : '대기가 취소되었습니다.';
 const formatTime = (time) => time?.startAt?.slice(0, 5) ?? '';
 const getItemKey = (item) => {
     const theme = getTheme(item);
@@ -47,7 +50,7 @@ export default function MyReservationPage({ onBack, showToast }) {
 
         deleteRequest
             .then(() => {
-                showToast(`${isReserved ? '예약' : '대기'}이 성공적으로 취소되었습니다.`);
+                showToast(getCancelCompleteMessage(isReserved));
                 setDeleteTarget(null);
                 return reloadReservations();
             })
@@ -76,7 +79,7 @@ export default function MyReservationPage({ onBack, showToast }) {
             {hasSearched && (
                 <div className={styles.list}>
                     {reservations.length === 0 ? (
-                        <p className={styles.empty}>조회된 예약이 없습니다.</p>
+                        <p className={styles.empty}>조회된 예약 또는 대기가 없습니다.</p>
                     ) : (
                         reservations.map(item => {
                             const theme = getTheme(item);
@@ -90,7 +93,7 @@ export default function MyReservationPage({ onBack, showToast }) {
                                         <div className={styles.titleRow}>
                                             <p className={styles.themeName}>{theme.name}</p>
                                             <span className={`${styles.statusBadge} ${isReserved ? styles.reserved : styles.waiting}`}>
-                                                {isReserved ? '예약' : '대기'}
+                                                {getReservationType(isReserved)}
                                             </span>
                                         </div>
                                         <p className={styles.dateTime}>{item.date} | {formatTime(time)}</p>
@@ -117,7 +120,7 @@ export default function MyReservationPage({ onBack, showToast }) {
                 return (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
-                        <h3>정말 {isReserved ? '예약' : '대기'}을 취소하시겠습니까?</h3>
+                        <h3>정말 {getReservationTypeWithObjectParticle(isReserved)} 취소하시겠습니까?</h3>
                         <div className={styles.modalInfo}>
                             <p><strong>테마:</strong> {theme.name}</p>
                             <p><strong>날짜:</strong> {deleteTarget.date}</p>
@@ -127,7 +130,7 @@ export default function MyReservationPage({ onBack, showToast }) {
                         <div className={styles.modalActions}>
                             <button className={styles.cancelBtn} onClick={() => setDeleteTarget(null)}>닫기</button>
                             <button className={styles.confirmDeleteBtn} onClick={confirmDelete}>
-                                {isReserved ? '예약' : '대기'} 취소
+                                {getReservationType(isReserved)} 취소
                             </button>
                         </div>
                     </div>

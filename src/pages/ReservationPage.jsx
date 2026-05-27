@@ -105,7 +105,7 @@ export default function ReservationPage({ onConfirm, onBack, showToast }) {
             {loadingTimes ? (
               <p className={styles.hint}>불러오는 중...</p>
             ) : times.length === 0 ? (
-              <p className={styles.hint}>예약 가능한 시간이 없습니다.</p>
+              <p className={styles.hint}>선택 가능한 시간이 없습니다.</p>
             ) : (
               <div className={styles.timeGrid}>
                 {times.map((t) => (
