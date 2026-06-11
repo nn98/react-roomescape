@@ -65,6 +65,11 @@ export const createReservation = (body) => fetchJson('/reservations', { method: 
 export const deleteReservation = (id, userName) => fetchJson(`/reservations/${id}?${createQueryString({ userName })}`, { method: 'DELETE' });
 export const putReservation = (id, userName, body) => fetchJson(`/reservations/${id}?${createQueryString({ userName })}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
+// --- Session API ---
+export const fetchSessions = () => fetchJson('/sessions');
+export const createSession = (body) => fetchJson('/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+export const createSessionsBatch = (date) => fetchJson(`/sessions/batch?${createQueryString({ date })}`, { method: 'POST' });
+
 // --- Waiting API ---
 export const createWaiting = (body) =>
     fetchJson('/waitings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });

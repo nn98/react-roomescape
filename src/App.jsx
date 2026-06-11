@@ -5,6 +5,7 @@ import ConfirmPage from './pages/ConfirmPage.jsx';
 import MyReservationPage from './pages/MyReservationPage.jsx';
 import ThemeManagePage from './pages/ThemeManagePage.jsx'; // 추가
 import TimeManagePage from './pages/TimeManagePage.jsx';   // 추가
+import SessionManagePage from './pages/SessionManagePage.jsx';
 import styles from './App.module.css';
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
                     {/* 메뉴 추가 */}
                     <button className={styles.navBtn} onClick={() => setPage('themeManage')}>테마 관리</button>
                     <button className={styles.navBtn} onClick={() => setPage('timeManage')}>시간 관리</button>
+                    <button className={styles.navBtn} onClick={() => setPage('sessionManage')}>세션 관리</button>
                     <button className={styles.navBtn} onClick={() => setPage('myReservations')}>내 예약 조회</button>
                 </nav>
             </header>
@@ -39,6 +41,7 @@ export default function App() {
                 {/* 관리 페이지 렌더링 추가 */}
                 {page === 'themeManage' && <ThemeManagePage onBack={() => setPage('home')} showToast={showToast} />}
                 {page === 'timeManage' && <TimeManagePage onBack={() => setPage('home')} showToast={showToast} />}
+                {page === 'sessionManage' && <SessionManagePage onBack={() => setPage('home')} showToast={showToast} />}
             </main>
 
             {toastMessage && (
