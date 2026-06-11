@@ -1,24 +1,44 @@
 {
   "rewrites": [
     {
-      "source": "/themes/:path*",
-      "destination": "https://woowa-glen.duckdns.org/themes/:path*"
+      "source": "/themes",
+      "destination": "https://woowa-glen.duckdns.org/themes"
     },
     {
-      "source": "/times/:path*",
-      "destination": "https://woowa-glen.duckdns.org/times/:path*"
+      "source": "/themes/:path+",
+      "destination": "https://woowa-glen.duckdns.org/themes/:path+"
     },
     {
-      "source": "/reservations/:path*",
-      "destination": "https://woowa-glen.duckdns.org/reservations/:path*"
+      "source": "/times",
+      "destination": "https://woowa-glen.duckdns.org/times"
     },
     {
-      "source": "/waitings/:path*",
-      "destination": "https://woowa-glen.duckdns.org/waitings/:path*"
+      "source": "/times/:path+",
+      "destination": "https://woowa-glen.duckdns.org/times/:path+"
     },
     {
-      "source": "/sessions/:path*",
-      "destination": "https://woowa-glen.duckdns.org/sessions/:path*"
+      "source": "/reservations",
+      "destination": "https://woowa-glen.duckdns.org/reservations"
+    },
+    {
+      "source": "/reservations/:path+",
+      "destination": "https://woowa-glen.duckdns.org/reservations/:path+"
+    },
+    {
+      "source": "/waitings",
+      "destination": "https://woowa-glen.duckdns.org/waitings"
+    },
+    {
+      "source": "/waitings/:path+",
+      "destination": "https://woowa-glen.duckdns.org/waitings/:path+"
+    },
+    {
+      "source": "/sessions",
+      "destination": "https://woowa-glen.duckdns.org/sessions"
+    },
+    {
+      "source": "/sessions/:path+",
+      "destination": "https://woowa-glen.duckdns.org/sessions/:path+"
     }
   ]
 }
