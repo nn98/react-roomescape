@@ -11,6 +11,7 @@ export default function ReservationPage({ onConfirm, onBack, showToast }) {
   const [times, setTimes] = useState([]);
   const [selectedTime, setSelectedTime] = useState('');
   const [name, setName] = useState('');
+  const [amount, setAmount] = useState('');
   const [loadingTimes, setLoadingTimes] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -37,7 +38,7 @@ export default function ReservationPage({ onConfirm, onBack, showToast }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedTheme || !date || !selectedTime || !name.trim()) return;
+    if (!selectedTheme || !date || !selectedTime || !name.trim() || !amount) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -46,6 +47,7 @@ export default function ReservationPage({ onConfirm, onBack, showToast }) {
         date,
         timeId: Number(selectedTime),
         name: name.trim(),
+        amount: Number(amount),
       };
 
       if (isWaitingMode) {
@@ -137,10 +139,24 @@ export default function ReservationPage({ onConfirm, onBack, showToast }) {
           </div>
         )}
 
+        {selectedTime && (
+          <div className={styles.field}>
+            <label>결제 금액 (원)</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="결제 금액을 입력하세요"
+              min="0"
+              required
+            />
+          </div>
+        )}
+
         <button
           type="submit"
           className={styles.submitBtn}
-          disabled={!selectedTheme || !date || !selectedTime || !name.trim() || submitting}
+          disabled={!selectedTheme || !date || !selectedTime || !name.trim() || !amount || submitting}
         >
           {submitting ? `${isWaitingMode ? '대기 신청' : '예약'} 중...` : `${isWaitingMode ? '대기 신청' : '예약 확정'}`}
         </button>

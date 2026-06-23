@@ -15,14 +15,14 @@ export default function SessionManagePage({ onBack, showToast }) {
 
     const [batchDate, setBatchDate] = useState(today);
 
-    useEffect(() => {
+    const reloadSessions = () =>
         fetchSessions().then(setSessions).catch(e => showToast(e.message));
+
+    useEffect(() => {
+        reloadSessions();
         fetchThemes().then(setThemes).catch(e => showToast(e.message));
         fetchTimes().then(setTimes).catch(e => showToast(e.message));
     }, []);
-
-    const reloadSessions = () =>
-        fetchSessions().then(setSessions).catch(e => showToast(e.message));
 
     const handleCreateSession = async (e) => {
         e.preventDefault();

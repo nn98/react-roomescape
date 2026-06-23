@@ -12,6 +12,9 @@ export default function ConfirmPage({ reservation, onHome }) {
         <Row label="날짜" value={reservation.date} />
         <Row label="시간" value={reservation.time.startAt.slice(0, 5)} />
         <Row label="예약자" value={reservation.name} />
+        {reservation.amount != null && (
+          <Row label="결제 금액" value={`${reservation.amount.toLocaleString()}원`} />
+        )}
       </div>
 
       <button className={styles.homeBtn} onClick={onHome}>

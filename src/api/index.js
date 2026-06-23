@@ -60,10 +60,13 @@ export const updateTime = (id, body) => fetchJson(`/times/${id}`, {
 });
 
 // --- Reservation API (User Domain) ---
+export const fetchReservations = () => fetchJson('/reservations');
+export const fetchReservation = (id) => fetchJson(`/reservations/${id}`);
 export const getReservationsByName = (userName) => fetchJson(`/reservations?${createQueryString({ userName })}`);
 export const createReservation = (body) => fetchJson('/reservations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 export const deleteReservation = (id, userName) => fetchJson(`/reservations/${id}?${createQueryString({ userName })}`, { method: 'DELETE' });
 export const putReservation = (id, userName, body) => fetchJson(`/reservations/${id}?${createQueryString({ userName })}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+export const patchReservation = (id, userName, body) => fetchJson(`/reservations/${id}?${createQueryString({ userName })}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
 // --- Session API ---
 export const fetchSessions = () => fetchJson('/sessions');
