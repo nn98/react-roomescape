@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import HomePage from './pages/HomePage.jsx';
 import ReservationPage from './pages/ReservationPage.jsx';
 import ConfirmPage from './pages/ConfirmPage.jsx';
@@ -6,17 +6,34 @@ import MyReservationPage from './pages/MyReservationPage.jsx';
 import ThemeManagePage from './pages/ThemeManagePage.jsx';
 import TimeManagePage from './pages/TimeManagePage.jsx';
 import SessionManagePage from './pages/SessionManagePage.jsx';
+import PaymentSuccessPage from './pages/PaymentSuccessPage.jsx';
 import styles from './App.module.css';
 
-export default function App() {
-    const [page, setPage] = useState('home');
-    const [reservation, setReservation] = useState(null);
-    const [toastMessage, setToastMessage] = useState('');
+const getInitialPage = () => {
+    const payment = new URLSearchParams(window.location.search).get('payment');
+    if (payment === 'success') return 'paymentSuccess';
+    if (payment === 'fail') return 'paymentFail';
+    return 'home';
+};
 
-    const showToast = (message) => {
-        setToastMessage(message);
-        setTimeout(() => setToastMessage(''), 3000);
+export default function App() {
+    const [page, setPage] = useState(getInitialPage);
+    const [reservation, setReservation] = useState(null);
+    const [toast, setToast] = useState({ message: '', type: 'error' });
+
+    const showToast = (message, type = 'error') => {
+        setToast({ message, type });
+        setTimeout(() => setToast({ message: '', type: 'error' }), 3000);
     };
+
+    // 결제 실패 리디렉션 처리
+    useEffect(() => {
+        if (page !== 'paymentFail') return;
+        const message = new URLSearchParams(window.location.search).get('message') || '결제가 취소되었습니다.';
+        window.history.replaceState({}, '', '/');
+        showToast(message);
+        setPage('home');
+    }, []);
 
     return (
         <div className={styles.app}>
@@ -33,7 +50,18 @@ export default function App() {
             <main className={styles.main}>
                 {page === 'home' && <HomePage onReserve={() => setPage('reservation')} showToast={showToast} />}
                 {page === 'reservation' && (
-                    <ReservationPage onConfirm={(data) => { setReservation(data); setPage('confirm'); }} onBack={() => setPage('home')} showToast={showToast} />
+                    <ReservationPage
+                        onConfirm={(data) => { setReservation(data); setPage('confirm'); }}
+                        onBack={() => setPage('home')}
+                        showToast={showToast}
+                    />
+                )}
+                {page === 'paymentSuccess' && (
+                    <PaymentSuccessPage
+                        onConfirm={(data) => { setReservation(data); setPage('confirm'); }}
+                        onBack={() => setPage('home')}
+                        showToast={showToast}
+                    />
                 )}
                 {page === 'confirm' && <ConfirmPage reservation={reservation} onHome={() => setPage('home')} />}
                 {page === 'myReservations' && <MyReservationPage onBack={() => setPage('home')} showToast={showToast} />}
@@ -43,9 +71,9 @@ export default function App() {
                 {page === 'sessionManage' && <SessionManagePage onBack={() => setPage('home')} showToast={showToast} />}
             </main>
 
-            {toastMessage && (
-                <div className={styles.toast}>
-                    {toastMessage}
+            {toast.message && (
+                <div className={toast.type === 'success' ? styles.toastSuccess : styles.toast}>
+                    {toast.message}
                 </div>
             )}
         </div>

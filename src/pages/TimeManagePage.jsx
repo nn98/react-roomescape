@@ -35,10 +35,10 @@ export default function TimeManagePage({ onBack, showToast }) {
         try {
             if (isEditing) {
                 await updateTime(editId, { startAt });
-                showToast('시간이 수정되었습니다.');
+                showToast('시간이 수정되었습니다.', 'success');
             } else {
                 await createTime({ startAt });
-                showToast('새 시간이 추가되었습니다.');
+                showToast('새 시간이 추가되었습니다.', 'success');
             }
             resetForm();
             loadTimes();
@@ -51,7 +51,7 @@ export default function TimeManagePage({ onBack, showToast }) {
         if (!window.confirm('정말 이 시간을 삭제하시겠습니까?')) return;
         try {
             await deleteTime(id);
-            showToast('시간이 삭제되었습니다.');
+            showToast('시간이 삭제되었습니다.', 'success');
             loadTimes();
         } catch (e) {
             showToast(e.message);

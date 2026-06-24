@@ -42,12 +42,11 @@
   border-color: #fff;
 }
 
-.toast {
+.toast,
+.toastSuccess {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  background: #e53e3e;
-  color: #fff;
   padding: 16px 24px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -55,6 +54,15 @@
   font-weight: bold;
   animation: slideIn 0.3s ease-out forwards;
   z-index: 1000;
+  color: #fff;
+}
+
+.toast {
+  background: #e53e3e;
+}
+
+.toastSuccess {
+  background: #38a169;
 }
 
 @keyframes slideIn {

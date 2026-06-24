@@ -29,7 +29,7 @@ export default function SessionManagePage({ onBack, showToast }) {
         if (!date || !themeId || !timeId) return;
         try {
             await createSession({ date, themeId: Number(themeId), timeId: Number(timeId) });
-            showToast('세션이 생성되었습니다.');
+            showToast('세션이 생성되었습니다.', 'success');
             setThemeId('');
             setTimeId('');
             reloadSessions();
@@ -43,7 +43,7 @@ export default function SessionManagePage({ onBack, showToast }) {
         if (!batchDate) return;
         try {
             const created = await createSessionsBatch(batchDate);
-            showToast(`${batchDate} 세션 ${created.length}개가 일괄 생성되었습니다.`);
+            showToast(`${batchDate} 세션 ${created.length}개가 일괄 생성되었습니다.`, 'success');
             reloadSessions();
         } catch (err) {
             showToast(err.message);

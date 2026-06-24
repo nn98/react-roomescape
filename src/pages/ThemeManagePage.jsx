@@ -43,10 +43,10 @@ export default function ThemeManagePage({ onBack, showToast }) {
         try {
             if (isEditing) {
                 await updateTheme(editId, payload);
-                showToast('테마가 수정되었습니다.');
+                showToast('테마가 수정되었습니다.', 'success');
             } else {
                 await createTheme(payload);
-                showToast('새 테마가 추가되었습니다.');
+                showToast('새 테마가 추가되었습니다.', 'success');
             }
             resetForm();
             loadThemes();
@@ -59,7 +59,7 @@ export default function ThemeManagePage({ onBack, showToast }) {
         if (!window.confirm('정말 이 테마를 삭제하시겠습니까?')) return;
         try {
             await deleteTheme(id);
-            showToast('테마가 삭제되었습니다.');
+            showToast('테마가 삭제되었습니다.', 'success');
             loadThemes();
         } catch (e) {
             showToast(e.message);

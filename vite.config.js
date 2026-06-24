@@ -10,23 +10,23 @@ export default defineConfig({
       // 프론트에서 /themes, /times, /reservations 로 시작하는 요청을
       // 타겟(8080)으로 전달하도록 설정합니다.
       '/themes': {
-        target: 'https://woowa-glen.duckdns.org',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
       '/times': {
-        target: 'https://woowa-glen.duckdns.org',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
       '/reservations': {
-        target: 'https://woowa-glen.duckdns.org',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
       '/waitings': {
-        target: 'https://woowa-glen.duckdns.org',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       },
       '/sessions': {
-        target: 'https://woowa-glen.duckdns.org',
+        target: 'http://localhost:8080',
         changeOrigin: true,
       }
     }

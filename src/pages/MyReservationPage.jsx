@@ -50,7 +50,7 @@ export default function MyReservationPage({ onBack, showToast }) {
 
         deleteRequest
             .then(() => {
-                showToast(getCancelCompleteMessage(isReserved));
+                showToast(getCancelCompleteMessage(isReserved), 'success');
                 setDeleteTarget(null);
                 return reloadReservations();
             })
