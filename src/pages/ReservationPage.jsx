@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { fetchThemes, fetchAvailableTimes, createWaiting } from '../api/index.js';
+import { fetchThemes, fetchAvailableTimes, createWaiting, preparePayment } from '../api/index.js';
 import styles from './ReservationPage.module.css';
 
 const CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
@@ -79,8 +79,8 @@ export default function ReservationPage({ onConfirm, onBack, showToast }) {
         return;
       }
 
-      // 예약 → 결제 위젯 단계로 이동
-      const orderId = crypto.randomUUID();
+      // 예약 → 결제 위젯 단계로 이동 (orderId 서버 발급)
+      const { orderId } = await preparePayment(FIXED_AMOUNT);
       orderIdRef.current = orderId;
       sessionStorage.setItem('pendingReservation', JSON.stringify({ ...body, orderId }));
       setWidgetPhase(true);

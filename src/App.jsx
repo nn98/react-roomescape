@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { cancelPreparedPayment } from './api/index.js';
 import HomePage from './pages/HomePage.jsx';
 import ReservationPage from './pages/ReservationPage.jsx';
 import ConfirmPage from './pages/ConfirmPage.jsx';
@@ -29,7 +30,14 @@ export default function App() {
     // 결제 실패 리디렉션 처리
     useEffect(() => {
         if (page !== 'paymentFail') return;
-        const message = new URLSearchParams(window.location.search).get('message') || '결제가 취소되었습니다.';
+        const params = new URLSearchParams(window.location.search);
+        const message = params.get('message') || '결제가 취소되었습니다.';
+        // PAY_PROCESS_CANCELED 등 일부 에러는 orderId가 없으므로 sessionStorage에서 fallback
+        const urlOrderId = params.get('orderId');
+        const pending = JSON.parse(sessionStorage.getItem('pendingReservation') || 'null');
+        const orderId = urlOrderId ?? pending?.orderId;
+        if (orderId) cancelPreparedPayment(orderId).catch(() => {});
+        sessionStorage.removeItem('pendingReservation');
         window.history.replaceState({}, '', '/');
         showToast(message);
         setPage('home');

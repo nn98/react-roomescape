@@ -1,5 +1,20 @@
 # 변경 명세 — react-roomescape
 
+## 개요
+
+초기 레포 대비 **Toss Payments SDK v2 위젯 연동** 및 **결제 리디렉션 처리**가 핵심 변경이다.
+
+| 구분 | 변경 내용 |
+|------|-----------|
+| **결제 위젯** | Toss SDK v2 스크립트 로드. `TossPayments.ANONYMOUS` 위젯으로 카드/간편결제 UI 렌더링 |
+| **2단계 플로우** | 예약 폼 제출 → `POST /payments/prepare` (서버 orderId 발급) → 위젯 렌더링 → `requestPayment` → Toss 인증 페이지 리디렉션 |
+| **성공 처리** | `/?payment=success` 로 돌아오면 `PaymentSuccessPage` 가 URL 파라미터 + sessionStorage 에서 데이터 복원 후 `POST /reservations` 호출 |
+| **실패·취소 처리** | `/?payment=fail` 또는 `USER_CANCEL` 예외 시 `DELETE /payments/prepare/{orderId}` 로 서버 pending 레코드 정리 후 에러 토스트 |
+| **금액 고정** | 결제 금액 50,000원 상수(`FIXED_AMOUNT`) 고정. 금액 입력 UI 제거 |
+| **React 18 대응** | `useRef(false)` 가드로 Strict Mode 이중 `useEffect` 실행 방지 (결제 승인 중복 호출 차단) |
+
+---
+
 ## 1. Toss Payments SDK 로드
 
 **파일**: `index.html`
@@ -107,15 +122,83 @@ const [page, setPage] = useState(getInitialPage);
 
 ---
 
-## 결제 전체 흐름 요약
+---
+
+# [2차] orderId 서버 발급 및 결제 취소 정리
+
+> 요구사항: orderId를 클라이언트가 생성하면 임의 값 삽입 가능. 서버가 발급하고 금액과 함께 저장 후 검증해야 한다. 결제 취소/실패 시 서버 pending 레코드를 정리해야 한다.
+
+---
+
+## 6. vite.config.js — /payments 프록시 추가
+
+**요구사항**: `POST /payments/prepare`, `DELETE /payments/prepare/{orderId}` 호출을 개발 서버에서 백엔드(8080)로 전달해야 한다.
+
+**파일**: `vite.config.js`
+
+```js
+'/payments': { target: 'http://localhost:8080', changeOrigin: true }
+```
+
+---
+
+## 7. api/index.js — 결제 준비/취소 API 추가
+
+**파일**: `src/api/index.js`
+
+```js
+preparePayment(amount)          // POST /payments/prepare → { orderId }
+cancelPreparedPayment(orderId)  // DELETE /payments/prepare/{orderId} → 204
+```
+
+---
+
+## 8. ReservationPage — orderId 서버 발급으로 교체
+
+**요구사항**: `crypto.randomUUID()`로 클라이언트에서 생성하면 임의 값 주입 가능. 서버가 orderId를 발급해야 한다.
+
+**파일**: `src/pages/ReservationPage.jsx`
+
+```js
+// 변경 전
+const orderId = crypto.randomUUID();
+
+// 변경 후 (서버 발급 + pending_payment 행 생성)
+const { orderId } = await preparePayment(FIXED_AMOUNT);
+```
+
+결제 위젯 진입 전에 `preparePayment`가 성공해야 위젯이 렌더링된다. 실패 시 에러 표시 후 위젯 진입 안 함.
+
+---
+
+## 9. App.jsx — failUrl에서 pending 레코드 정리
+
+**요구사항**: 결제 취소/실패 시 서버에 생성된 `pending_payment` 레코드를 삭제해야 한다.
+
+**파일**: `src/App.jsx`
+
+```js
+// PAY_PROCESS_CANCELED 등 일부 에러코드는 orderId가 URL에 없음
+// → sessionStorage fallback으로 null 가드 처리
+const urlOrderId = params.get('orderId');
+const pending = JSON.parse(sessionStorage.getItem('pendingReservation') || 'null');
+const orderId = urlOrderId ?? pending?.orderId;
+if (orderId) cancelPreparedPayment(orderId).catch(() => {}); // fire-and-forget
+```
+
+---
+
+## 결제 전체 흐름 요약 (2차 기준)
 
 ```
 [ReservationPage]
-  폼 작성 → sessionStorage 저장 → Toss 위젯 렌더링
-    → requestPayment() → (Toss 인증 페이지)
-      → 성공: /?payment=success&paymentKey=...&orderId=...&amount=...
-        → [PaymentSuccessPage] POST /reservations (paymentKey 포함)
-          → [ConfirmPage]
-      → 실패/취소: /?payment=fail or USER_CANCEL 예외
-        → 에러 토스트, 홈으로
+  폼 작성 → POST /payments/prepare → orderId 서버 발급
+    → sessionStorage 저장 → Toss 위젯 렌더링
+      → requestPayment() → (Toss 인증 페이지)
+        → 성공: /?payment=success&paymentKey=...&orderId=...&amount=...
+            → [PaymentSuccessPage] POST /reservations (paymentKey, orderId, amount 포함)
+              → [ConfirmPage]
+        → 실패/취소: /?payment=fail or USER_CANCEL 예외
+            → DELETE /payments/prepare/{orderId} (pending 레코드 정리)
+            → 에러 토스트, 홈으로
 ```

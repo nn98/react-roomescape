@@ -73,6 +73,13 @@ export const fetchSessions = () => fetchJson('/sessions');
 export const createSession = (body) => fetchJson('/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 export const createSessionsBatch = (date) => fetchJson(`/sessions/batch?${createQueryString({ date })}`, { method: 'POST' });
 
+// --- Payment API ---
+export const preparePayment = (amount) =>
+    fetchJson('/payments/prepare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount }) });
+
+export const cancelPreparedPayment = (orderId) =>
+    fetchJson(`/payments/prepare/${orderId}`, { method: 'DELETE' });
+
 // --- Waiting API ---
 export const createWaiting = (body) =>
     fetchJson('/waitings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
