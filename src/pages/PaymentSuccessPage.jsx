@@ -29,7 +29,15 @@ export default function PaymentSuccessPage({ onConfirm, onBack, showToast }) {
         onConfirm(result);
       })
       .catch((e) => {
-        showToast(e.message);
+        // read timeout은 "승인됐는지 모르는" 상태 — "실패"로 단정하지 않고 확인/재시도를 안내한다.
+        // (같은 orderId의 멱등키로 재시도해도 서버가 이중 승인을 막는다)
+        if (e.code === 'PAYMENT_RESULT_UNKNOWN') {
+          showToast('결제 결과가 확인되지 않았습니다. ‘내 예약 조회’의 주문/결제 내역에서 상태를 확인하거나 잠시 후 다시 시도해 주세요.');
+        } else if (e.code === 'PAYMENT_GATEWAY_UNREACHABLE') {
+          showToast('결제 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        } else {
+          showToast(e.message);
+        }
         window.history.replaceState({}, '', '/');
         onBack();
       });

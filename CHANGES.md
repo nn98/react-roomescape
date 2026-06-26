@@ -203,6 +203,18 @@ if (orderId) cancelPreparedPayment(orderId).catch(() => {}); // fire-and-forget
   호출부가 `e.code === 'PAYMENT_RESULT_UNKNOWN'`처럼 분기할 수 있게 한다. (기존 `e.message` 동작 유지)
 - `getPaymentHistory(userName)` 추가 → `GET /payments?userName=` (프록시는 기존 `/payments` 재사용)
 
+## 11. PaymentSuccessPage — 확인 필요 / 연결 실패 구분
+
+**파일**: `src/pages/PaymentSuccessPage.jsx`
+
+confirm(`POST /reservations`) 실패를 code로 분기한다.
+
+| code | HTTP | 안내 |
+|------|------|------|
+| `PAYMENT_RESULT_UNKNOWN` | 504 | "결과가 확인되지 않았습니다 — 내역에서 확인/재시도" (실패로 단정 안 함) |
+| `PAYMENT_GATEWAY_UNREACHABLE` | 503 | "연결하지 못했습니다 — 잠시 후 재시도" |
+| 그 외 | — | 기존 `e.message` 토스트 |
+
 ---
 
 ## 결제 전체 흐름 요약 (2차 기준)
