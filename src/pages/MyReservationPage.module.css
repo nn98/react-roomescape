@@ -65,6 +65,45 @@
     background: #3d3014;
     color: #f6d365;
 }
+.statusBadge.confirmed {
+    background: #14361f;
+    color: #86efac;
+}
+.statusBadge.pending {
+    background: #3d3014;
+    color: #f6d365;
+}
+.statusBadge.failed {
+    background: #4a1414;
+    color: #fca5a5;
+}
+.statusBadge.unknown {
+    background: #3a2a0a;
+    color: #fbbf24;
+}
+.sectionTitle {
+    font-size: 20px;
+    color: #fff;
+    margin: 36px 0 16px;
+}
+.amount {
+    font-size: 14px;
+    color: #ddd;
+    font-weight: 700;
+    margin-top: 4px;
+}
+.orderId {
+    font-size: 12px;
+    color: #777;
+    margin-top: 4px;
+    word-break: break-all;
+}
+.unknownHint {
+    font-size: 13px;
+    color: #fbbf24;
+    margin-top: 6px;
+    line-height: 1.5;
+}
 .dateTime { font-size: 14px; color: #aaa; }
 .waitingNumber {
     color: #f6d365;

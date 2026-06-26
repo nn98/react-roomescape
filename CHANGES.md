@@ -215,6 +215,15 @@ confirm(`POST /reservations`) 실패를 code로 분기한다.
 | `PAYMENT_GATEWAY_UNREACHABLE` | 503 | "연결하지 못했습니다 — 잠시 후 재시도" |
 | 그 외 | — | 기존 `e.message` 토스트 |
 
+## 12. MyReservationPage — 주문/결제 내역 표시
+
+**파일**: `src/pages/MyReservationPage.jsx`, `MyReservationPage.module.css`
+
+이름 조회 시 예약/대기와 함께 `getPaymentHistory`로 결제 내역을 불러와 하단에 표시한다.
+
+- 상태 배지: 결제 대기(PENDING) / 확정(CONFIRMED) / 실패(FAILED) / **확인 필요(UNKNOWN)** — 서버 `statusLabel` 사용
+- 금액·주문번호·결제키 노출, `UNKNOWN`은 "다시 시도해 확인하세요" 힌트 표시
+
 ---
 
 ## 결제 전체 흐름 요약 (2차 기준)

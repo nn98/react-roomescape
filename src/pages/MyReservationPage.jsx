@@ -1,6 +1,14 @@
 import { useState } from 'react';
-import { getReservationsByName, deleteReservation, deleteWaiting } from '../api/index.js';
+import { getReservationsByName, getPaymentHistory, deleteReservation, deleteWaiting } from '../api/index.js';
 import styles from './MyReservationPage.module.css';
+
+// 결제 상태별 배지 색상 클래스. 라벨(결제 대기/확정/실패/확인 필요)은 서버 statusLabel을 그대로 사용.
+const PAYMENT_STATUS_CLASS = {
+    CONFIRMED: styles.confirmed,
+    PENDING: styles.pending,
+    FAILED: styles.failed,
+    UNKNOWN: styles.unknown,
+};
 
 const getTheme = (item) => item.themeResponse ?? item.theme;
 const getTime = (item) => item.timeResponse ?? item.time;
@@ -19,25 +27,21 @@ const getItemKey = (item) => {
 export default function MyReservationPage({ onBack, showToast }) {
     const [userName, setUserName] = useState('');
     const [reservations, setReservations] = useState([]);
+    const [payments, setPayments] = useState([]);
     const [hasSearched, setHasSearched] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState(null); // 삭제 확인용 타겟 상태
 
     const handleSearch = (e) => {
         e.preventDefault(); // 폼 제출 시 새로고침 방지 (엔터 키 지원)
         if (!userName.trim()) return;
-
-        getReservationsByName(userName)
-            .then((data) => {
-                setReservations(data);
-                setHasSearched(true);
-            })
-            .catch((e) => showToast(e.message));
+        reloadReservations().catch((e) => showToast(e.message));
     };
 
     const reloadReservations = () => {
-        return getReservationsByName(userName)
-            .then((data) => {
-                setReservations(data);
+        return Promise.all([getReservationsByName(userName), getPaymentHistory(userName)])
+            .then(([reservationData, paymentData]) => {
+                setReservations(reservationData);
+                setPayments(paymentData);
                 setHasSearched(true);
             });
     };
@@ -109,6 +113,46 @@ export default function MyReservationPage({ onBack, showToast }) {
                         })
                     )}
                 </div>
+            )}
+
+            {hasSearched && payments.length > 0 && (
+                <>
+                    <h3 className={styles.sectionTitle}>주문 / 결제 내역</h3>
+                    <div className={styles.list}>
+                        {payments.map((payment) => {
+                            const time = getTime(payment);
+                            const statusClass = PAYMENT_STATUS_CLASS[payment.status] ?? '';
+
+                            return (
+                                <div key={payment.orderId} className={styles.card}>
+                                    <div className={styles.info}>
+                                        <div className={styles.titleRow}>
+                                            <p className={styles.themeName}>{payment.theme?.name ?? '주문'}</p>
+                                            <span className={`${styles.statusBadge} ${statusClass}`}>
+                                                {payment.statusLabel}
+                                            </span>
+                                        </div>
+                                        {payment.date && (
+                                            <p className={styles.dateTime}>{payment.date} | {formatTime(time)}</p>
+                                        )}
+                                        {payment.amount != null && (
+                                            <p className={styles.amount}>{payment.amount.toLocaleString()}원</p>
+                                        )}
+                                        {payment.status === 'UNKNOWN' && (
+                                            <p className={styles.unknownHint}>
+                                                결제 결과가 확인되지 않았습니다. 잠시 후 다시 시도해 상태를 확인하세요.
+                                            </p>
+                                        )}
+                                        <p className={styles.orderId}>주문번호 {payment.orderId}</p>
+                                        {payment.paymentKey && (
+                                            <p className={styles.orderId}>결제키 {payment.paymentKey}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </>
             )}
 
             {/* 삭제 확인 모달 */}
