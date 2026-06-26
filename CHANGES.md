@@ -226,6 +226,21 @@ confirm(`POST /reservations`) 실패를 code로 분기한다.
 
 ---
 
+# [4차] Rate Limit 응답(429/Retry-After) 처리
+
+> 서버 4차(Rate Limit) 대응. 서버가 한도 초과로 429(+Retry-After)를 주거나, 토스 한도 초과로
+> 503(`TOSS_RATE_LIMITED`/`PAYMENT_OUTBOUND_RATE_LIMITED`+Retry-After)을 주면 사용자에게 안내한다.
+
+## 13. api/index.js — 429/Retry-After 안내
+
+**파일**: `src/api/index.js`
+
+`parseResponse`가 `Retry-After` 헤더를 읽어 에러에 `retryAfter`로 싣는다. 본문이 비어 있는 인바운드 429는
+"요청이 많아 잠시 제한되었습니다. N초 후 다시 시도해 주세요."로 변환한다. 토스 한도 초과 503은 서버가 주는
+`detail` 문구를 그대로 노출한다. (호출부의 `showToast(e.message)`가 그대로 안내)
+
+---
+
 ## 결제 전체 흐름 요약 (2차 기준)
 
 ```

@@ -19,11 +19,20 @@ const parseResponse = async (response) => {
     } catch (e) {
       // JSON 파싱 실패 시 기존 HTTP 에러 메시지 유지
     }
+    // Rate Limit(429/503)은 Retry-After를 함께 싣고, 본문이 없는 인바운드 429는 안내 문구로 바꾼다.
+    const retryAfter = Number(response.headers.get('Retry-After')) || null;
+    if (response.status === 429 && !errorCode) {
+      errorMsg = retryAfter
+        ? `요청이 많아 잠시 제한되었습니다. ${retryAfter}초 후 다시 시도해 주세요.`
+        : '요청이 많아 잠시 제한되었습니다. 잠시 후 다시 시도해 주세요.';
+    }
+
     // read timeout(PAYMENT_RESULT_UNKNOWN) 등 결과가 불명확한 응답을 호출부가
     // "실패"와 구분해 안내할 수 있도록 code/status를 에러에 함께 싣는다.
     const error = new Error(errorMsg);
     error.status = response.status;
     if (errorCode) error.code = errorCode;
+    if (retryAfter) error.retryAfter = retryAfter;
     throw error;
   }
   if (response.status === 204 || !responseText) {
