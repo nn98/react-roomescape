@@ -5,6 +5,7 @@ const parseResponse = async (response) => {
 
   if (!response.ok) {
     let errorMsg = `${response.status} ${response.statusText}`;
+    let errorCode;
     try {
       // ProblemDetail 규격인 'detail' 필드를 최우선으로 파싱하고,
       // 기존 하위 호환성을 위해 'message' 필드도 확인합니다.
@@ -14,10 +15,16 @@ const parseResponse = async (response) => {
       } else if (errorData.message) {
         errorMsg = errorData.message;
       }
+      errorCode = errorData.code;
     } catch (e) {
       // JSON 파싱 실패 시 기존 HTTP 에러 메시지 유지
     }
-    throw new Error(errorMsg);
+    // read timeout(PAYMENT_RESULT_UNKNOWN) 등 결과가 불명확한 응답을 호출부가
+    // "실패"와 구분해 안내할 수 있도록 code/status를 에러에 함께 싣는다.
+    const error = new Error(errorMsg);
+    error.status = response.status;
+    if (errorCode) error.code = errorCode;
+    throw error;
   }
   if (response.status === 204 || !responseText) {
     return null;
@@ -79,6 +86,9 @@ export const preparePayment = (amount) =>
 
 export const cancelPreparedPayment = (orderId) =>
     fetchJson(`/payments/prepare/${orderId}`, { method: 'DELETE' });
+
+// 주문/결제 내역: 결제 상태(결제 대기/확정/실패/확인 필요)·orderId·paymentKey·금액을 예약 정보와 함께 반환
+export const getPaymentHistory = (userName) => fetchJson(`/payments?${createQueryString({ userName })}`);
 
 // --- Waiting API ---
 export const createWaiting = (body) =>

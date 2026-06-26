@@ -188,6 +188,23 @@ if (orderId) cancelPreparedPayment(orderId).catch(() => {}); // fire-and-forget
 
 ---
 
+---
+
+# [3차] 결과 불명확(확인 필요) 처리 · 주문/결제 내역
+
+> 서버 3차(타임아웃 방어·멱등 재시도·주문/결제 내역) 대응. confirm이 read timeout으로 불명확하게
+> 끝난 경우를 "실패"로 단정하지 않고 "확인 필요"로 안내하며, 내 예약 페이지에서 결제 상태를 함께 본다.
+
+## 10. api/index.js — 에러 code/status 노출 + 결제 내역 API
+
+**파일**: `src/api/index.js`
+
+- `parseResponse`가 ProblemDetail의 `code`와 HTTP `status`를 throw하는 `Error` 객체에 함께 싣는다.
+  호출부가 `e.code === 'PAYMENT_RESULT_UNKNOWN'`처럼 분기할 수 있게 한다. (기존 `e.message` 동작 유지)
+- `getPaymentHistory(userName)` 추가 → `GET /payments?userName=` (프록시는 기존 `/payments` 재사용)
+
+---
+
 ## 결제 전체 흐름 요약 (2차 기준)
 
 ```
